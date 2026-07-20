@@ -1,0 +1,19 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+backend/support.db
+backend/vectorstore/
+
+# Secrets
+.env
+backend/.env
+frontend/.env.local
+
+# Node / Next
+node_modules/
+frontend/.next/
+frontend/out/
+
+# OS
+.DS_Store
