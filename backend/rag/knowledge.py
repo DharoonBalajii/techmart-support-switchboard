@@ -119,19 +119,22 @@ class KnowledgeBase:
         if not self.chunks:
             return
         try:
-            from sentence_transformers import SentenceTransformer
+            from fastembed import TextEmbedding
             import faiss
+            import numpy as np
 
-            self._model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-            vecs = self._model.encode(
-                [c.text for c in self.chunks],
-                normalize_embeddings=True,
-                show_progress_bar=False,
-            )
+            self._model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+            
+            # fastembed returns a generator, convert to list
+            embeddings = list(self._model.embed([c.text for c in self.chunks]))
+            vecs = np.array(embeddings, dtype='float32')
+            # normalize for cosine similarity
+            vecs = vecs / np.linalg.norm(vecs, axis=1, keepdims=True)
+
             # Create a FAISS vector database index using inner product (cosine similarity)
             self._index = faiss.IndexFlatIP(vecs.shape[1])
             self._index.add(vecs)
-            self.backend = "semantic (MiniLM + FAISS)"
+            self.backend = "semantic (fastembed + FAISS)"
         except Exception as e:
             print("Falling back to lexical search:", e)
             # Lexical fallback: precompute document frequencies for tf-idf.
@@ -171,7 +174,10 @@ class KnowledgeBase:
         return out
 
     def _semantic(self, query, candidates):
-        qv = self._model.encode([query], normalize_embeddings=True)[0].reshape(1, -1)
+        import numpy as np
+        
+        qv = list(self._model.embed([query]))[0].reshape(1, -1)
+        qv = qv / np.linalg.norm(qv, axis=1, keepdims=True)
         
         # Search the entire FAISS index
         k_search = len(self.chunks)
