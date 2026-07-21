@@ -14,7 +14,11 @@ SESSION_TTL_DAYS = 30
 
 _DB_PATH = Path(get_settings().database_url)
 if not _DB_PATH.is_absolute():
-    _DB_PATH = Path(__file__).resolve().parent.parent / _DB_PATH
+    import os
+    if os.environ.get("VERCEL"):
+        _DB_PATH = Path("/tmp") / _DB_PATH.name
+    else:
+        _DB_PATH = Path(__file__).resolve().parent.parent / _DB_PATH
 
 
 def _conn() -> sqlite3.Connection:
