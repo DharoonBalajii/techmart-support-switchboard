@@ -361,6 +361,10 @@ export default function Landing() {
       <footer className="lp-foot">
         <span>TechMart Electronics · Support Switchboard</span>
         <span>A multi-agent RAG assistant on OpenRouter</span>
+        <div style={{ display: "flex", gap: "16px", marginTop: "8px" }}>
+          <Link href="/privacy">Privacy Policy</Link>
+          <Link href="/terms">Terms & Conditions</Link>
+        </div>
       </footer>
     </div>
   );
